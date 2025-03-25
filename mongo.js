@@ -36,18 +36,19 @@ const Blog = mongoose.model('Blog', blogSchema);
 
 //crear nota
 /*const blog = new Blog({
-    title: 'Apertura del blog',
+    title: 'Hey, esta es mi tercer publicacion en el blog',
     author: 'aressantonio',
     url: 'https://www.github.com/aressantonio',
-});*/
+    likes: 4,
+});
 
 //crear post
-/*blog.save().then(()=>{
+blog.save().then(()=>{
     console.log('note saved!');
     mongoose.connection.close();
 });*/
 
-if(process.argv.length === 2){
+if(process.argv.length === 3){
     
     Blog.find({}).then(result =>{
         result.forEach(blog =>{
@@ -56,7 +57,7 @@ if(process.argv.length === 2){
         mongoose.connection.close();
     });
     
-} else if(process.argv.length === 3){
+} else if(process.argv.length === 4){
     //EndPoint busqueda especifica por nombre
     Blog.find({author: name}).then(result =>{
     result.forEach(blog =>{
@@ -65,5 +66,3 @@ if(process.argv.length === 2){
     mongoose.connection.close();
     });
 }
-
-
