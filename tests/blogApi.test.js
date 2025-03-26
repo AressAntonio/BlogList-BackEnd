@@ -133,6 +133,36 @@ describe('when there is initially some blogs saved', () =>{
             });
 
         })
+
+        describe('update of a blog', () =>{
+
+            test('succeds updata of a blog', async () =>{
+                const blogAtStart = await helper.blogsInDb();
+                const blogToUpdate = blogAtStart[0];
+
+                const newBlog = {
+                    title: 'async/await simplifies making async calls',
+                    author: 'aressantonio',
+                    url: 'https://www.github.com/aressantonio',
+                    likes: 100,
+                };
+            
+                await api
+                    .put(`/api/blogs/${blogToUpdate.id}`)
+                    .send(newBlog)
+                    .expect(200)
+                    .expect('Content-Type', /application\/json/)
+                
+                const blogsAtEnd = await helper.blogsInDb()
+                assert(blogsAtEnd.length, helper.initialBlogs.length + 1)
+               
+                const contents = blogsAtEnd.map(n => n.title)
+            
+                assert(contents.includes('async/await simplifies making async calls'));
+            });
+
+        })
+
     })
 
     after(async() =>{
@@ -140,6 +170,8 @@ describe('when there is initially some blogs saved', () =>{
     });
 
 })
+
+
 
 
 
