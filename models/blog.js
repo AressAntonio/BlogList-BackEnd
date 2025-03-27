@@ -18,6 +18,10 @@ const mongoose = require('mongoose');
      },
      likes: {
         type: Number,
+     },
+     user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
      }
     });
 
