@@ -66,7 +66,8 @@ const getTokenFrom = request => {
     }
 
     return null;
-}
+};
+
 //EndPoint create new post
 
 blogsRouter.post('/', async (request, response) =>{
