@@ -39,7 +39,7 @@ blogsRouter.delete('/:id', async (request, response) =>{
 });
 
 //EndPoint update post
-blogsRouter.put('/:id', async (request, response) =>{
+/*blogsRouter.put('/:id', async (request, response) =>{
     const body = request.body
 
     const blog = {
@@ -53,8 +53,19 @@ blogsRouter.put('/:id', async (request, response) =>{
     response.status(200).json(updatedBlogs);
 
     
+});*/
+blogsRouter.put('/:id', async (request, response) => {
+    try {
+      const updatedBlog = await Blog.findByIdAndUpdate(
+        request.params.id,
+        { $inc: { likes: 1 } }, // Incrementa en 1 sin necesidad de enviar el valor actual
+        { new: true }
+      );
+      response.status(200).json(updatedBlog);
+    } catch(error){
+      response.status(500).json({error});
+    }
 });
-
 
 //usando jwt para creacion de nuevos blogs segun usuario
 const getTokenFrom = request => {
