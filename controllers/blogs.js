@@ -30,30 +30,7 @@ blogsRouter.get('/:id', async (request, response ) =>{
     
 });
 
-//EndPoint delte post
-blogsRouter.delete('/:id', async (request, response) =>{
-    
-   await Blog.findByIdAndDelete(request.params.id);
-   response.status(204).end();
-
-});
-
-//EndPoint update post
-/*blogsRouter.put('/:id', async (request, response) =>{
-    const body = request.body
-
-    const blog = {
-        title: body.title,
-        author: body.author,
-        url: body.url,
-        likes: body.likes
-    }
-
-    const updatedBlogs = await Blog.findByIdAndUpdate(request.params.id, blog, {new: true});
-    response.status(200).json(updatedBlogs);
-
-    
-});*/
+//EndPoint update likes of posts
 blogsRouter.put('/:id', async (request, response) => {
     try {
       const updatedBlog = await Blog.findByIdAndUpdate(
@@ -107,6 +84,40 @@ blogsRouter.post('/', async (request, response) =>{
     await user.save()
 
     response.status(201).json(savedBlog);
+
+});
+
+//EndPoint delte post
+blogsRouter.delete('/:id', async (request, response) =>{
+
+
+    try {
+      // 1. Verificar token
+      const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET);
+      if (!decodedToken.id) return response.status(401).json({ error: 'Token inválido' });
+  
+      // 2. Buscar usuario y blog
+      const user = await User.findById(decodedToken.id);
+      const blog = await Blog.findById(request.params.id);
+  
+      if (!blog) return response.status(404).json({ error: 'Blog no encontrado' });
+  
+      // 3. Comparar IDs (convertir a String para comparación segura)
+      if (blog.user.toString() !== user._id.toString()) {
+        return response.status(403).json({ error: 'No tienes permiso para eliminar este post' });
+      }
+  
+      // 4. Eliminar blog
+      await Blog.findByIdAndDelete(request.params.id);
+      response.status(204).json('se a eliminado el post').end();
+  
+    } catch (error) {
+      console.log(error.name)
+      response.status(500).json({ error: 'Error interno del servidor' });
+    }
+    
+    
+   
 
 });
 
