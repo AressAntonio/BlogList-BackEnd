@@ -31,7 +31,7 @@ blogsRouter.get('/:id', async (request, response ) =>{
 });
 
 //EndPoint update likes of posts
-blogsRouter.put('/:id', async (request, response) => {
+blogsRouter.put('/:id/likes', async (request, response) => {
     try {
       const updatedBlog = await Blog.findByIdAndUpdate(
         request.params.id,
@@ -43,6 +43,7 @@ blogsRouter.put('/:id', async (request, response) => {
       response.status(500).json({error});
     }
 });
+
 
 //usando jwt para creacion de nuevos blogs segun usuario
 const getTokenFrom = request => {
@@ -115,10 +116,92 @@ blogsRouter.delete('/:id', async (request, response) =>{
       console.log(error.name)
       response.status(500).json({ error: 'Error interno del servidor' });
     }
-    
-    
-   
 
 });
+
+//EndPoint update post content
+blogsRouter.put('/:id', async (request, response) =>{
+  /*try{
+    const body = request.body;
+    
+
+    const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET);
+
+    if (!decodedToken.id){
+        return response.status(401).json({error: 'token invalid'})
+    }
+    
+    const user = await User.findById(decodedToken.id);
+    const blog = await Blog.findById(request.params.id);
+
+    if (!blog) return response.status(404).json({ error: 'Post no encontrado' });
+    
+    if (blog.user.toString() !== user._id.toString()) {
+        return response.status(403).json({ error: 'No tienes permiso para eliminar este post' });
+    }
+
+     const UpdatePost = await Blog.findByIdAndUpdate(request.params.id, {title: body.title}, {new: true});
+     
+     response.status(201).json(UpdatePost).end();
+
+  
+
+  }catch (error){
+    response.status(500).json({error});
+  };*/
+   
+  try {
+    const { id } = request.params;
+    const { title } = request.body;
+
+    // Verificar token
+    const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET);
+    if (!decodedToken.id) {
+      return response.status(401).json({ error: 'Token inválido o faltante' });
+    }
+
+    // Buscar el post y el usuario
+    const blog = await Blog.findById(id);
+    const user = await User.findById(decodedToken.id);
+
+    // Validaciones
+    if (!blog) return response.status(404).json({ error: 'Post no encontrado' });
+    if (blog.user.toString() !== user._id.toString()) {
+      return response.status(403).json({ error: 'No tienes permiso para editar este post' });
+    }
+
+    // Actualizar con validaciones de esquema
+    const updatedBlog = await Blog.findByIdAndUpdate(
+      id,
+      { 
+        title: title || blog.title // Mantiene el valor actual si no se envía nuevo 
+      },
+      { 
+        new: true,
+        runValidators: true, // Aplica validaciones del schema
+        context: 'query' 
+      }
+    );
+
+    response.status(200).json(updatedBlog);
+
+  } catch (error) {
+    console.error(error);
+    
+    if (error.name === 'JsonWebTokenError') {
+      return response.status(401).json({ error: 'Token inválido' });
+    }
+    
+    if (error.name === 'ValidationError') {
+      return response.status(400).json({ error: error.message });
+    }
+    
+    response.status(500).json({ 
+      error: 'Error al actualizar el post',
+      details: error.message 
+    });
+  }
+
+})
 
 module.exports = blogsRouter;
